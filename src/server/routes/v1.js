@@ -2,7 +2,6 @@ const express = require('express')
 const aws = require('aws-sdk')
 
 const db = require('../database')
-const notes = require('../database/notes')
 const authenticate = require('./authenticate')
 const flats = require('./flats')
 const jwtMiddleware = require('./jwt-middleware')
@@ -154,8 +153,7 @@ router.put('/flats/join', (req, res) => {
 
 router.get('/flats/:id/notes', (req, res) => {
   const id = req.params.id
-  console.log('here')
-  notes.getNotesByFlatId(id)
+  db.getNotesByFlatId(id)
     .then(notes => {
       return res.json(notes)
     })
@@ -165,7 +163,7 @@ router.get('/flats/:id/notes', (req, res) => {
 })
 
 router.post('/flats/:id/notes', (req, res) => {
-  notes.addNote(req.body)
+  db.addNote(req.body)
     .then(note => {
       return res.json(note[0])
     })
@@ -176,7 +174,7 @@ router.post('/flats/:id/notes', (req, res) => {
 
 router.delete('/notes/:id', (req, res) => {
   const id = req.params.id
-  notes.deleteNote(id)
+  db.deleteNote(id)
     .then(id => {
       return res.json({success: true})
     })

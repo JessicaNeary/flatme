@@ -292,11 +292,9 @@ function getDocuments (flatId) {
 **/
 
 function getNotesByFlatId (flatId) {
-  console.log('getting notes for', flatId)
   return knex('notes')
     .where('flat_id', flatId)
     .then(notes => {
-      console.log(notes)
       return notes.map(note => {
         return {
           id: note.id,
