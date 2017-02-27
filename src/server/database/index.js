@@ -3,34 +3,13 @@ const bcrypt = require('bcrypt')
 
 const saltRounds = 10
 
-const notes = require('./notes')
-
-function addDocument (flatId, url, name) {
-  return knex('documents')
-    .insert({
-      flat_id: flatId,
-      url,
-      name
-    })
-}
-
-function getDocuments (flatId) {
-  return knex('documents')
-    .where('flat_id', flatId)
-    .then(records => {
-      return records.map(record => {
-        return {
-          id: record.id,
-          url: record.url,
-          name: record.name
-        }
-      })
-    })
-}
-
 function comparePassword (password, hash) {
   return bcrypt.compare(password, hash)
 }
+
+/**
+*** USER FUNCTIONS
+**/
 
 function addUser (user) {
   return bcrypt.hash(user.password, saltRounds)
@@ -84,6 +63,10 @@ function getUserById (id) {
       }
     })
 }
+
+/**
+*** FLAT FUNCTIONS
+**/
 
 function addFlat (flat) {
   return knex('flats')
@@ -164,6 +147,29 @@ function getFlatByName (name) {
     })
 }
 
+function getFlatmates (flatId) {
+  return knex('tenancies')
+    .join('users', 'tenancies.user_id', '=', 'users.id')
+    .join('flats', 'tenancies.flat_id', '=', 'flats.id')
+    .select('flats.id as flatId', 'users.first_name as firstName', 'users.last_name as lastName', 'users.id as userId', 'users.email as email', 'users.phone_number as phoneNumber')
+    .where('flat_id', flatId)
+    .then(flatmates => {
+      return flatmates.map(flatmate => {
+        return {
+          id: flatmate.userId,
+          firstName: flatmate.firstName,
+          lastName: flatmate.lastName,
+          email: flatmate.email,
+          phoneNumber: flatmate.phoneNumber
+        }
+      })
+    })
+}
+
+/**
+*** TENANCY FUNCTIONS
+**/
+
 function addTenancy (userId, flatId) {
   return getTenancy(userId, flatId)
     .then(tenancy => {
@@ -197,24 +203,9 @@ function leaveFlat (userId, flatId) {
   .del()
 }
 
-function getFlatmates (flatId) {
-  return knex('tenancies')
-    .join('users', 'tenancies.user_id', '=', 'users.id')
-    .join('flats', 'tenancies.flat_id', '=', 'flats.id')
-    .select('flats.id as flatId', 'users.first_name as firstName', 'users.last_name as lastName', 'users.id as userId', 'users.email as email', 'users.phone_number as phoneNumber')
-    .where('flat_id', flatId)
-    .then(flatmates => {
-      return flatmates.map(flatmate => {
-        return {
-          id: flatmate.userId,
-          firstName: flatmate.firstName,
-          lastName: flatmate.lastName,
-          email: flatmate.email,
-          phoneNumber: flatmate.phoneNumber
-        }
-      })
-    })
-}
+/**
+*** JOIN REQUEST FUNCTIONS
+**/
 
 function addJoinRequest (userId, flatId) {
   return knex('join-requests')
@@ -269,6 +260,77 @@ function updateJoinRequestStatus (requestId, status) {
     })
 }
 
+/**
+*** DOCUMENT FUNCTIONS
+**/
+
+function addDocument (flatId, url, name) {
+  return knex('documents')
+    .insert({
+      flat_id: flatId,
+      url,
+      name
+    })
+}
+
+function getDocuments (flatId) {
+  return knex('documents')
+    .where('flat_id', flatId)
+    .then(records => {
+      return records.map(record => {
+        return {
+          id: record.id,
+          url: record.url,
+          name: record.name
+        }
+      })
+    })
+}
+
+/**
+*** NOTES FUNCTIONS
+**/
+
+function getNotesByFlatId (flatId) {
+  console.log('getting notes for', flatId)
+  return knex('notes')
+    .where('flat_id', flatId)
+    .then(notes => {
+      console.log(notes)
+      return notes.map(note => {
+        return {
+          id: note.id,
+          content: note.content,
+          author: note.author
+        }
+      })
+    })
+}
+
+function addNote (note) {
+  return knex('notes')
+    .insert({
+      flat_id: note.flat_id,
+      content: note.content,
+      author: note.author
+    })
+    .returning('id')
+    .then(noteId => {
+      return getNoteById(noteId[0])
+    })
+}
+
+function deleteNote (id) {
+  return knex('notes')
+    .where('id', id)
+    .del()
+}
+
+function getNoteById (id) {
+  return knex('notes')
+    .where('id', id)
+}
+
 module.exports = {
   addDocument,
   addFlat,
@@ -286,7 +348,7 @@ module.exports = {
   comparePassword,
   leaveFlat,
   updateJoinRequestStatus,
-  addNote: notes.addNote,
-  deleteNote: notes.deleteNote,
-  getNotesByFlatId: notes.getNotesByFlatId
+  getNotesByFlatId,
+  addNote,
+  deleteNote
 }
