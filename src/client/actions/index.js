@@ -37,6 +37,29 @@ export const fetchFlat = id => {
   }
 }
 
+export const updateUser = fields => {
+  return (dispatch, getState) => {
+    const userId = getState().account.user.id
+    dispatch({
+      userId,
+      type: 'UPDATE_USER_PENDING'
+    })
+    return getAxios().put(`/v1/users/${userId}`, fields)
+     .then(res => {
+       return dispatch({
+         type: 'UPDATE_USER_SUCCESS',
+         fields
+       })
+     })
+     .catch(error => {
+       return dispatch({
+         message: error.message,
+         type: 'UPDATE_USER_FAILURE'
+       })
+     })
+  }
+}
+
 export const fetchUserFlats = id => {
   return dispatch => {
     dispatch({
@@ -85,16 +108,19 @@ export const fetchUser = id => {
   }
 }
 
-export const fetchNotes = id => {
-  console.log(id)
+export const fetchNotes = flatId => {
   return dispatch => {
     dispatch({
-      id,
+      flatId,
       type: 'FETCH_NOTES_PENDING'
     })
-    return axios.get(`/v1/notes/${id}`)
+    return getAxios().get(`/v1/flats/${flatId}/notes`)
       .then(res => {
         const notes = res.data
+          .reduce((acc, note) => {
+            acc[note.id] = note
+            return acc
+          }, {})
         return dispatch({
           type: 'FETCH_NOTES_SUCCESS',
           notes
@@ -102,7 +128,6 @@ export const fetchNotes = id => {
       })
       .catch(error => {
         return dispatch({
-          id,
           message: error.message,
           type: 'FETCH_NOTES_FAILURE'
         })
@@ -110,23 +135,44 @@ export const fetchNotes = id => {
   }
 }
 
-export const deleteNote = note => {
+export const addNote = note => {
   return dispatch => {
     dispatch({
       note,
-      type: 'DELETE_NOTE_PENDING'
+      type: 'ADD_NOTE_PENDING'
     })
-    const id = note.id
-    return axios.post(`/v1/notes/${id}`)
+    return getAxios().post(`/v1/flats/${note.flat_id}/notes`, note)
       .then(res => {
         return dispatch({
-          type: 'DELETE_NOTE_SUCCESS',
-          note
+          type: 'ADD_NOTE_SUCCESS',
+          note: res.data
         })
       })
       .catch(error => {
         return dispatch({
-          note,
+          message: error.message,
+          type: 'ADD_NOTE_FAILURE'
+        })
+      })
+  }
+}
+
+export const deleteNote = id => {
+  return dispatch => {
+    dispatch({
+      id,
+      type: 'DELETE_NOTE_PENDING'
+    })
+    return getAxios().delete(`/v1/notes/${id}`)
+      .then(res => {
+        return dispatch({
+          type: 'DELETE_NOTE_SUCCESS',
+          id
+        })
+      })
+      .catch(error => {
+        return dispatch({
+          id,
           message: error.message,
           type: 'DELETE_NOTE_FAILURE'
         })
@@ -144,6 +190,7 @@ export const login = (email, password) => {
         const user = response.data
         window.localStorage.clear()
         window.localStorage.setItem('login', JSON.stringify(user))
+        history.push('/')
         return dispatch({
           type: 'LOGIN_SUCCESS',
           user
@@ -193,12 +240,16 @@ export const signUp = user => {
   }
 }
 
-export const createNewFlat = flat => {
+export const createNewFlat = (flat, user) => {
   return dispatch => {
     dispatch({
       type: 'CREATE_FLAT_PENDING'
     })
-    return getAxios().post(`/v1/flats`, flat)
+    const req = {
+      flat,
+      user
+    }
+    return getAxios().post(`/v1/flats`, req)
       .then(response => {
         const flat = response.data
         history.push(`/flat/${flat.id}`)
@@ -207,7 +258,9 @@ export const createNewFlat = flat => {
           flat
         })
       })
+      .then()
       .catch(error => {
+        window.alert(`Sorry, flat ${flat.flatName} already exists. Please select another name.`)
         dispatch({
           message: error.message,
           type: 'CREATE_FLAT_FAILURE'
@@ -224,16 +277,91 @@ export const joinFlat = flatName => {
     return getAxios().post(`/v1/flats/join`, {name: flatName})
       .then(response => {
         const flatId = response.data.flatId
-        history.push(`/flat/${flatId}`)
         dispatch({
+          flatId: flatId,
           type: 'JOIN_FLAT_SUCCESS'
         })
       })
       .catch(error => {
+        window.alert(
+          `${flatName} does not exist. Please find another house.`
+        )
         dispatch({
           message: error.message,
           type: 'JOIN_FLAT_FAILURE'
         })
       })
+  }
+}
+
+export const acceptJoinRequest = requestId => {
+  return dispatch => {
+    dispatch({
+      type: 'ACCEPT_JOIN_REQUEST_PENDING'
+    })
+    return getAxios().put(`/v1/flats/join`, {
+      requestId,
+      status: 'accepted'
+    })
+      .then(response => {
+        dispatch({
+          requestId,
+          type: 'ACCEPT_JOIN_REQUEST_SUCCESS'
+        })
+      })
+      .catch(error => {
+        dispatch({
+          message: error.message,
+          requestId,
+          type: 'ACCEPT_JOIN_REQUEST_FAILURE'
+        })
+      })
+  }
+}
+
+export const ignoreJoinRequest = requestId => {
+  return dispatch => {
+    dispatch({
+      type: 'IGNORE_JOIN_REQUEST_PENDING'
+    })
+    return getAxios().put(`/v1/flats/join`, {
+      requestId,
+      status: 'ignored'
+    })
+      .then(response => {
+        dispatch({
+          requestId,
+          type: 'IGNORE_JOIN_REQUEST_SUCCESS'
+        })
+      })
+      .catch(error => {
+        dispatch({
+          message: error.message,
+          requestId,
+          type: 'IGNORE_JOIN_REQUEST_FAILURE'
+        })
+      })
+  }
+}
+
+export const leaveFlat = (userId, flatId) => {
+  return dispatch => {
+    dispatch({
+      type: 'LEAVE_FLAT_PENDING'
+    })
+    return getAxios().delete(`/v1/flats/${flatId}/${userId}`)
+     .then(response => {
+       dispatch({
+         userId,
+         flatId,
+         type: 'LEAVE_FLAT_SUCCESS'
+       })
+     })
+     .catch(error => {
+       dispatch({
+         message: error.message,
+         type: 'LEAVE_FLAT_FAILED'
+       })
+     })
   }
 }

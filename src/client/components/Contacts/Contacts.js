@@ -1,5 +1,7 @@
 import React, { PropTypes } from 'react'
 
+import './style.css'
+
 const flatmates = props => {
   if (!props.flat) {
     return []
@@ -25,8 +27,8 @@ const flatmates = props => {
 
 const Contacts = props => {
   return (
-    <div>
-      <h1>My Flatmates</h1>
+    <div className='Contacts'>
+      <h1 id='contacts-title'>Flatmates</h1>
       <ul>
         {flatmates(props)}
       </ul>

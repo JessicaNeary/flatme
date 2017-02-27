@@ -80,11 +80,11 @@ const Navigation = React.createClass({
       </Modal>
     )
     return (
-      <div>
+      <div className='Navigation'>
         <Navbar inverse collapseOnSelect>
           <Navbar.Header>
             <Navbar.Brand>
-              <a href='/'><img src='/images/web.svg' width='30px' /></a>
+              <a href='/'><img src='/images/web.svg' width='30px' /><span>goFlat</span></a>
             </Navbar.Brand>
             <Navbar.Toggle />
           </Navbar.Header>
@@ -99,6 +99,9 @@ const Navigation = React.createClass({
 })
 
 Navigation.propTypes = {
+  account: PropTypes.shape({
+    user: PropTypes.object
+  }).isRequired,
   dispatch: PropTypes.func.isRequired,
   login: PropTypes.func.isRequired,
   logout: PropTypes.func.isRequired
