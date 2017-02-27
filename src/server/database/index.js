@@ -3,6 +3,8 @@ const bcrypt = require('bcrypt')
 
 const saltRounds = 10
 
+const notes = require('./notes')
+
 function comparePassword (password, hash) {
   return bcrypt.compare(password, hash)
 }
@@ -137,43 +139,43 @@ function getFlatmates (flatId) {
     })
 }
 
-function addNote (note) {
-  return knex('notes')
-    .insert({
-      flat_id: note.flat_id,
-      content: note.content,
-      author: note.author
-    })
-    .then(getNotes(note.flat_id))
-}
-
-function editNote (note) {
-  return knex('notes')
-    .where('id', note.id)
-    .update({
-      content: note.content
-    })
-}
-
-function deleteNote (id) {
-  return knex('notes')
-    .where('id', id)
-    .del()
-}
-
-function getNotes (id) {
-  return knex('notes')
-    .where('flat_id', id)
-    .then(notes => {
-      return notes.map(note => {
-        return {
-          id: note.id,
-          content: note.content,
-          author: note.author
-        }
-      })
-    })
-}
+// function addNote (note) {
+//   return knex('notes')
+//     .insert({
+//       flat_id: note.flat_id,
+//       content: note.content,
+//       author: note.author
+//     })
+//     .then(getNotes(note.flat_id))
+// }
+//
+// function editNote (note) {
+//   return knex('notes')
+//     .where('id', note.id)
+//     .update({
+//       content: note.content
+//     })
+// }
+//
+// function deleteNote (id) {
+//   return knex('notes')
+//     .where('id', id)
+//     .del()
+// }
+//
+// function getNotes (id) {
+//   return knex('notes')
+//     .where('flat_id', id)
+//     .then(notes => {
+//       return notes.map(note => {
+//         return {
+//           id: note.id,
+//           content: note.content,
+//           author: note.author
+//         }
+//       })
+//     })
+// }
 
 module.exports = {
   addFlat,
@@ -185,8 +187,7 @@ module.exports = {
   getUserById,
   getUserByEmail,
   comparePassword,
-  getNotes,
-  addNote,
-  deleteNote,
-  editNote
+  getNotes: notes.getNotes,
+  addNote: notes.addNote,
+  deleteNote: notes.deleteNote
 }
