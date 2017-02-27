@@ -1,6 +1,8 @@
-import React from 'react'
+import React, { PropTypes } from 'react'
 import { Control, Errors, Form } from 'react-redux-form'
 import { Col } from 'react-bootstrap'
+
+import './style.css'
 
 const isNumber = val => !isNaN(Number(val))
 const maxLength = length => val => val && val.length <= length
@@ -18,7 +20,7 @@ const Join = React.createClass({
   },
   render () {
     return (
-      <div className='container-fluid'>
+      <div className='Join container-fluid'>
         <div className='row'>
           <div className='col-md-12 bg-join'>
             <div className='container containerJoin'>
@@ -192,15 +194,15 @@ const Join = React.createClass({
                           maxLength: ' Must be 15 characters or less'
                         }}
                       />
+
+                      <Errors
+                        model='forms.join'
+                        messages={{
+                          passwordMatch: 'Password need to match'
+                        }}
+                    />
                     </Col>
                   </div>
-
-                  <Errors
-                    model='forms.join'
-                    messages={{
-                      passwordMatch: 'Password need to match'
-                    }}
-                    />
                   <div>
                     <Col sm={12} >
                       <button className='submitJoinBtn btn btn-default dropdown-toggle' type='submit'>Add</button>
@@ -216,5 +218,9 @@ const Join = React.createClass({
     )
   }
 })
+
+Join.propTypes = {
+  signUp: PropTypes.func.isRequired
+}
 
 export default Join

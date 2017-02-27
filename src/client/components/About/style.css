@@ -1,0 +1,61 @@
+.AboutUs {
+  padding-top: 30px;
+}
+
+.AboutUs .title {
+  padding-bottom: 130px;
+  padding-left: 15px;
+  font-weight: bolder;
+}
+
+.AboutUs .body {
+  padding-left: 80px;
+}
+
+.AboutUs .body .who {
+  padding-right: 30px;
+  border-left: 1px solid black;
+}
+
+.AboutUs .body .contact {
+  padding-left: 20px;
+  border-left: 1px solid black;
+}
+
+.AboutUs .teamTitle {
+  padding-top: 40px;
+  padding-bottom: 40px;
+}
+
+.AboutUs .team {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.AboutUs h2 {
+  color: lightseagreen;
+}
+
+.card {
+  margin-bottom: 80px;
+}
+
+.AboutUs .circle {
+  display: block;
+  width: 150px;
+  height: 150px;
+  margin: 1em auto;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center;
+  -webkit-border-radius: 99em;
+  -moz-border-radius: 99em;
+  border-radius: 99em;
+  border: 5px solid #eee;
+  box-shadow: 0 3px 2px rgba(0, 0, 0, 0.3);
+}
+
+.AboutUs .team .card p a {
+  font-size: 12px;
+}
