@@ -2,6 +2,7 @@ const express = require('express')
 const aws = require('aws-sdk')
 
 const db = require('../database')
+const notes = require('../database/notes')
 const authenticate = require('./authenticate')
 const flats = require('./flats')
 const jwtMiddleware = require('./jwt-middleware')
@@ -153,7 +154,8 @@ router.put('/flats/join', (req, res) => {
 
 router.get('/flats/:id/notes', (req, res) => {
   const id = req.params.id
-  db.getNotesByFlatId(id)
+  console.log('here')
+  notes.getNotesByFlatId(id)
     .then(notes => {
       return res.json(notes)
     })
@@ -163,7 +165,7 @@ router.get('/flats/:id/notes', (req, res) => {
 })
 
 router.post('/flats/:id/notes', (req, res) => {
-  db.addNote(req.body)
+  notes.addNote(req.body)
     .then(note => {
       return res.json(note[0])
     })
@@ -174,19 +176,9 @@ router.post('/flats/:id/notes', (req, res) => {
 
 router.delete('/notes/:id', (req, res) => {
   const id = req.params.id
-  db.deleteNote(id)
+  notes.deleteNote(id)
     .then(id => {
       return res.json({success: true})
-    })
-    .catch(error => {
-      return res.status(500).send(error.message)
-    })
-})
-
-router.put('/notes/:id', (req, res) => {
-  db.updateNote(req.body)
-    .then(content => {
-      return res.json(content)
     })
     .catch(error => {
       return res.status(500).send(error.message)

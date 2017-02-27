@@ -3,7 +3,7 @@ const knex = require('knex')
 module.exports = {
   addNote,
   deleteNote,
-  getNotes
+  getNotesByFlatId
 }
 
 function addNote (note) {
@@ -13,7 +13,10 @@ function addNote (note) {
       content: note.content,
       author: note.author
     })
-    .then(getNotes(note.flat_id))
+    .returning('id')
+    .then(noteId => {
+      return getNoteById(noteId[0])
+    })
 }
 
 function deleteNote (id) {
@@ -22,9 +25,15 @@ function deleteNote (id) {
     .del()
 }
 
-function getNotes (id) {
+function getNoteById (id) {
   return knex('notes')
-    .where('flat_id', id)
+    .where('id', id)
+}
+
+function getNotesByFlatId (flatId) {
+  console.log('getting notes for', flatId)
+  return knex('notes')
+    .where('flat_id', flatId)
     .then(notes => {
       return notes.map(note => {
         return {
